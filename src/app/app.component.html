@@ -1,0 +1,15 @@
+<mat-toolbar color="accent">
+  Medio Melón
+</mat-toolbar>
+<mat-sidenav-container fxFlex>
+  <mat-sidenav opened mode="side">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/form" > Form </a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
