@@ -26,7 +26,7 @@ describe("Password Regex", () => {
     expect(PASSWORD_REGEX.test(password)).toBe(false);
   });
 
-  it("should reject alphanumeric password", () => {
+  it("should reject alphanumeric password without special characters", () => {
     const password = "2Lorem12";
     expect(PASSWORD_REGEX.test(password)).toBe(false);
   });
