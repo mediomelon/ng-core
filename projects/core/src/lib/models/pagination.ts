@@ -1,6 +1,6 @@
 export interface Page {
     index: number;
-    size: number;
+    size?: number;
 }
 
 export interface Pagination<T = any> {
