@@ -28,6 +28,13 @@ export abstract class EntityListQuery<E = any, UI = any, F = any> {
         );
     }
 
+    selectTotal(): Observable<number> {
+        return this.selectPagination().pipe(
+            map(state => state.total),
+            distinctUntilChanged()
+        );
+    }
+
     selectFilters(): Observable<F> {
         return this.selectPagination().pipe(
             map(state => state.filters),

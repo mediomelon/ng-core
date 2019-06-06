@@ -27,10 +27,24 @@ export abstract class EntityListStore<E = any, UI = any, F = any> {
         this.state$ = this._state$.asObservable();
     }
 
+    fetchPageWithFilters(payload: F) {
+        const state = this.getState();
+
+        const newState = produce<EntityListState>(state, draft => {
+            draft.loaded = false;
+            draft.loading = true;
+            draft.error = null;
+            draft.pagination.page.index = 0;
+            draft.pagination.filters = payload;
+        });
+
+        this.setState(newState);
+    }
+
     fetchPage(page?: Page) {
         const state = this.getState();
 
-        const newState = produce(state, draft => {
+        const newState = produce<EntityListState>(state, draft => {
             draft.loaded = false;
             draft.loading = true;
             draft.error = null;
@@ -71,7 +85,7 @@ export abstract class EntityListStore<E = any, UI = any, F = any> {
     fetchPageError(error: any) {
         const state = this.getState();
 
-        const newState = produce(state, draft => {
+        const newState = produce<EntityListState>(state, draft => {
             draft.loading = false;
             draft.error = error;
         });
