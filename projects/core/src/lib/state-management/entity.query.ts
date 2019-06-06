@@ -77,16 +77,20 @@ export abstract class EntityListQuery<E = any, UI = any, F = any> {
         return this.getPage().size;
     }
 
-    getError(): any {
-        return this.getState().error;
-    }
-
     getFilters(): F {
         return this.getState().pagination.filters;
     }
 
     getTotal(): number {
         return this.getState().pagination.total;
+    }
+
+    getError(): any {
+        return this.getState().error;
+    }
+
+    getLoaded(): boolean {
+        return this.getState().loaded;
     }
 
     protected selectIds(): Observable<number[]> {
