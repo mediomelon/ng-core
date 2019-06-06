@@ -93,6 +93,24 @@ export abstract class EntityListStore<E = any, UI = any, F = any> {
         this.setState(newState);
     }
 
+    upsert(entity: E) {
+        const state = this.getState();
+
+        const newState = produce<EntityListState>(state, draft => {
+            const { entities, uiEntities, ids, pagination } = draft;
+
+            const { id } = entity as any;
+
+            entities[id] = entity;
+
+            if (!uiEntities[id]) uiEntities[id] = this.createInitialUIState();
+
+            if (ids.length < pagination.page.size) ids.push(id);
+        });
+
+        this.setState(newState);
+    }
+
     getState() {
         return this._state$.getValue();
     }
