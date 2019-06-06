@@ -1,8 +1,8 @@
 import { combineLatest, Observable } from 'rxjs';
 import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 
-import { Pagination, StateWithUI } from '../models';
-import { EntityListStore, EntityMapState } from './entity.store';
+import { Page, Pagination, StateWithUI } from '../models';
+import { EntityListState, EntityListStore, EntityMapState } from './entity.store';
 
 export abstract class EntityListQuery<E = any, UI = any, F = any> {
     constructor(private __store__: EntityListStore<E, UI, F>) {}
@@ -65,6 +65,30 @@ export abstract class EntityListQuery<E = any, UI = any, F = any> {
         );
     }
 
+    getPage(): Page {
+        return this.getState().pagination.page;
+    }
+
+    getPageIndex(): number {
+        return this.getPage().index;
+    }
+
+    getPageSize(): number {
+        return this.getPage().size;
+    }
+
+    getError(): any {
+        return this.getState().error;
+    }
+
+    getFilters(): F {
+        return this.getState().pagination.filters;
+    }
+
+    getTotal(): number {
+        return this.getState().pagination.total;
+    }
+
     protected selectIds(): Observable<number[]> {
         return this.__store__.state$.pipe(
             map(state => state.ids),
@@ -91,5 +115,9 @@ export abstract class EntityListQuery<E = any, UI = any, F = any> {
             map(state => state.pagination),
             distinctUntilChanged()
         );
+    }
+
+    protected getState(): EntityListState<E, UI, F> {
+        return this.__store__.getState();
     }
 }
