@@ -113,6 +113,23 @@ export abstract class EntityListStore<E = any, UI = any, F = any> {
         this.setState(newState);
     }
 
+    remove(idToRemove: number) {
+        const state = this.getState();
+
+        const newState = produce<EntityListState<E, UI>>(state, draft => {
+            const { entities, uiEntities, pagination, ids } = draft;
+
+            delete entities[idToRemove];
+            delete uiEntities[idToRemove];
+
+            draft.ids = ids.filter(id => id != idToRemove);
+
+            if (pagination.total > 0) pagination.total--;
+        });
+
+        this.setState(newState);
+    }
+
     getState() {
         return this._state$.getValue();
     }
