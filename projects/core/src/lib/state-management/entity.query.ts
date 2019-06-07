@@ -72,6 +72,24 @@ export abstract class EntityListQuery<E = any, UI = any, F = any> {
         );
     }
 
+    selectEntity(id: number): Observable<E> {
+        return this.selectEntitiesMap().pipe(
+            map(entities => entities[id]),
+            distinctUntilChanged()
+        );
+    }
+
+    selectUIEntity(id: number): Observable<UI> {
+        return this.selectUIEntitiesMap().pipe(
+            map(entities => entities[id]),
+            distinctUntilChanged()
+        );
+    }
+
+    getEntity(id: number): E {
+        return this.getState().entities[id];
+    }
+
     getPage(): Page {
         return this.getState().pagination.page;
     }
