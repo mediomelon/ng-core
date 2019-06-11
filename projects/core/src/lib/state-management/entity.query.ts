@@ -2,9 +2,13 @@ import { combineLatest, Observable } from 'rxjs';
 import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { Page, Pagination, StateWithUI } from '../models';
-import { EntityListState, EntityListStore, EntityMapState } from './entity.store';
+import { EntityListState, EntityListStore, EntityMapState, UIState } from './entity.store';
 
-export abstract class EntityListQuery<E = any, UI = any, F = any> {
+export abstract class EntityListQuery<
+    E = any,
+    UI extends UIState = any,
+    F = any
+> {
     constructor(private __store__: EntityListStore<E, UI, F>) {}
 
     selectLoaded(): Observable<boolean> {
@@ -86,6 +90,27 @@ export abstract class EntityListQuery<E = any, UI = any, F = any> {
         );
     }
 
+    selectUIEntityLoaded(id: number): Observable<boolean> {
+        return this.selectUIEntity(id).pipe(
+            map(entity => entity.loaded),
+            distinctUntilChanged()
+        );
+    }
+
+    selectUIEntityLoading(id: number): Observable<boolean> {
+        return this.selectUIEntity(id).pipe(
+            map(entity => entity.loading),
+            distinctUntilChanged()
+        );
+    }
+
+    selectUIEntityError(id: number): Observable<any> {
+        return this.selectUIEntity(id).pipe(
+            map(entity => entity.error),
+            distinctUntilChanged()
+        );
+    }
+
     getEntity(id: number): E {
         return this.getState().entities[id];
     }
@@ -116,6 +141,18 @@ export abstract class EntityListQuery<E = any, UI = any, F = any> {
 
     getLoaded(): boolean {
         return this.getState().loaded;
+    }
+
+    getUIEntity(id: number): UI {
+        return this.getState().uiEntities[id];
+    }
+
+    getUIEntityLoaded(id: number): boolean {
+        return this.getUIEntity(id).loaded;
+    }
+
+    getUIEntityError(id: number): boolean {
+        return this.getUIEntity(id).error;
     }
 
     protected selectIds(): Observable<number[]> {

@@ -14,4 +14,10 @@ export class UserService {
             'https://jsonplaceholder.typicode.com/users'
         );
     }
+
+    get(id: number) {
+        return this.http.get<User>(
+            `https://jsonplaceholder.typicode.com/users/${id}`
+        );
+    }
 }

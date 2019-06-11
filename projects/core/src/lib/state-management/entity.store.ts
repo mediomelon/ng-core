@@ -1,13 +1,20 @@
 import produce from 'immer';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import { Page, Pagination, PaginationPayload } from '../models';
+
+export interface UIState {
+    loaded: boolean;
+    loading: boolean;
+    error: any;
+}
 
 export interface EntityMapState<T> {
     [id: number]: T;
 }
 
-export interface EntityListState<E = any, UI = any, F = any> {
+export interface EntityListState<E = any, UI extends UIState = any, F = any> {
     entities: EntityMapState<E>;
     uiEntities: EntityMapState<UI>;
     loaded: boolean;
@@ -17,7 +24,11 @@ export interface EntityListState<E = any, UI = any, F = any> {
     pagination: Pagination<F>;
 }
 
-export abstract class EntityListStore<E = any, UI = any, F = any> {
+export abstract class EntityListStore<
+    E = any,
+    UI extends UIState = any,
+    F = any
+> {
     protected _state$: BehaviorSubject<EntityListState<E, UI, F>>;
 
     public state$: Observable<EntityListState<E, UI, F>>;
@@ -25,6 +36,53 @@ export abstract class EntityListStore<E = any, UI = any, F = any> {
     constructor(initialState: EntityListState) {
         this._state$ = new BehaviorSubject(initialState);
         this.state$ = this._state$.asObservable();
+    }
+
+    fetch(id: number) {
+        const state = this.getState();
+
+        const newState = produce<EntityListState>(state, draft => {
+            const { uiEntities } = draft;
+
+            const uiEntity: UI = uiEntities[id] || this.createInitialUIState();
+
+            uiEntity.loading = true;
+            uiEntity.error = null;
+
+            uiEntities[id] = uiEntity;
+        });
+
+        this.setState(newState);
+    }
+
+    fetchSuccess(id: number, payload: E) {
+        const state = this.getState();
+
+        const newState = produce<EntityListState>(state, draft => {
+            const { entities, uiEntities } = draft;
+
+            const uiEntity: UI = uiEntities[id];
+
+            entities[id] = payload;
+            uiEntity.loading = false;
+        });
+
+        this.setState(newState);
+    }
+
+    fetchError(id: number, error: any) {
+        const state = this.getState();
+
+        const newState = produce<EntityListState>(state, draft => {
+            const { uiEntities } = draft;
+
+            const uiEntity: UI = uiEntities[id];
+
+            uiEntity.loading = false;
+            uiEntity.error = error;
+        });
+
+        this.setState(newState);
     }
 
     fetchPageWithFilters(payload: F) {
@@ -134,7 +192,13 @@ export abstract class EntityListStore<E = any, UI = any, F = any> {
         return this._state$.getValue();
     }
 
-    abstract createInitialUIState(): UI;
+    protected createInitialUIState(): UIState {
+        return {
+            loaded: false,
+            loading: false,
+            error: null,
+        };
+    }
 
     protected setState(state: EntityListState) {
         this._state$.next(state);

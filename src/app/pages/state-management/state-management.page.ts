@@ -15,12 +15,16 @@ export class StateManagementPage implements OnInit {
 
     entities$ = this.query.selectEntitiesWithUI();
 
+    isLoadingEntity$ = this.query.selectUIEntityLoading(1);
+
+    entity$ = this.query.selectEntity(1);
+
     constructor(
         private storeService: UserStoreService,
         private query: UserQuery
     ) {}
 
     ngOnInit() {
-        this.storeService.getAll().subscribe();
+        this.storeService.get(1).subscribe();
     }
 }

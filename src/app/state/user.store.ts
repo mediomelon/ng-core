@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
-import { EntityListState, EntityListStore } from 'projects/core/src/lib/state-management/entity.store';
+import { EntityListState, EntityListStore, UIState } from 'projects/core/src/lib/state-management/entity.store';
 
 import { User } from '../models/user';
 
-const initialState: EntityListState<User, {}> = {
+export interface UserUI extends UIState {
+    isOpen: boolean;
+}
+
+const initialState: EntityListState<User> = {
     entities: {},
     uiEntities: {},
     ids: [],
@@ -22,12 +26,17 @@ const initialState: EntityListState<User, {}> = {
 @Injectable({
     providedIn: 'root',
 })
-export class UserStore extends EntityListStore<User> {
+export class UserStore extends EntityListStore<User, UserUI> {
     constructor() {
         super(initialState);
     }
 
-    createInitialUIState() {
-        return {};
+    createInitialUIState(): UserUI {
+        return {
+            loaded: false,
+            loading: false,
+            error: null,
+            isOpen: false,
+        };
     }
 }
