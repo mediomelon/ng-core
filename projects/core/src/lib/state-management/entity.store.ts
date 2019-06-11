@@ -64,6 +64,7 @@ export abstract class EntityListStore<
             const uiEntity: UI = uiEntities[id];
 
             entities[id] = payload;
+            uiEntity.loaded = true;
             uiEntity.loading = false;
         });
 
@@ -127,8 +128,11 @@ export abstract class EntityListStore<
 
                 entities[id] = item;
 
-                if (!uiEntities[id])
-                    uiEntities[id] = this.createInitialUIState();
+                const uiEntity: UI =
+                    uiEntities[id] || this.createInitialUIState();
+                uiEntity.loaded = true;
+
+                uiEntities[id] = uiEntity;
             });
 
             draft.loaded = true;
