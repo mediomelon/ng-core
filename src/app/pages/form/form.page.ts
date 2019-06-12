@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { FormBase } from '@mediomelon/ng-core';
+import { FormBase } from 'projects/core/src/lib/base';
+
+// import { FormBase } from '@mediomelon/ng-core';
 
 @Component({
     selector: 'form-page',

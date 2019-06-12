@@ -92,21 +92,21 @@ export abstract class EntityListQuery<
 
     selectUIEntityLoaded(id: number): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            map(entity => entity.loaded),
+            map(entity => (entity ? entity.loaded : false)),
             distinctUntilChanged()
         );
     }
 
     selectUIEntityLoading(id: number): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            map(entity => entity.loading),
+            map(entity => (entity ? entity.loading : false)),
             distinctUntilChanged()
         );
     }
 
     selectUIEntityError(id: number): Observable<any> {
         return this.selectUIEntity(id).pipe(
-            map(entity => entity.error),
+            map(entity => (entity ? entity.error : null)),
             distinctUntilChanged()
         );
     }
@@ -148,11 +148,13 @@ export abstract class EntityListQuery<
     }
 
     getUIEntityLoaded(id: number): boolean {
-        return this.getUIEntity(id).loaded;
+        const entity = this.getUIEntity(id);
+        return entity ? entity.loaded : false;
     }
 
     getUIEntityError(id: number): boolean {
-        return this.getUIEntity(id).error;
+        const entity = this.getUIEntity(id);
+        return entity ? entity.error : null;
     }
 
     protected selectIds(): Observable<number[]> {

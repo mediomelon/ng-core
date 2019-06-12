@@ -6,10 +6,10 @@ export abstract class FormBase<T = any> {
 
     @Output('onSubmit') _submit = new EventEmitter<T>();
 
-    @ViewChild(FormGroupDirective, { static: false })
+    @ViewChild(FormGroupDirective, { static: true })
     ngForm: FormGroupDirective;
 
-    @ViewChild('submitButton', { static: false }) button: ElementRef;
+    @ViewChild('submitButton', { static: true }) button: ElementRef;
 
     form: FormGroup;
 
