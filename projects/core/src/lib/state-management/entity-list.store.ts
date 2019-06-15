@@ -1,14 +1,19 @@
 import produce from 'immer';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { EntityStoreState, UIState } from './state';
+import { Page, PaginationPayload } from '../models';
+import { EntityListStoreState, UIState } from './state';
 
-export abstract class EntityStore<E = any, UI extends UIState = any> {
-    protected _state$: BehaviorSubject<EntityStoreState<E, UI>>;
+export abstract class EntityListStore<
+    E = any,
+    UI extends UIState = any,
+    F = any
+> {
+    protected _state$: BehaviorSubject<EntityListStoreState<E, UI, F>>;
 
-    public state$: Observable<EntityStoreState<E, UI>>;
+    public state$: Observable<EntityListStoreState<E, UI, F>>;
 
-    constructor(initialState: EntityStoreState) {
+    constructor(initialState: EntityListStoreState) {
         this._state$ = new BehaviorSubject(initialState);
         this.state$ = this._state$.asObservable();
     }
@@ -16,7 +21,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
     fetch(id: number) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState>(state, draft => {
+        const newState = produce<EntityListStoreState>(state, draft => {
             const { uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id] || this.createInitialUIState();
@@ -33,7 +38,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
     fetchSuccess(id: number, payload: E) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState>(state, draft => {
+        const newState = produce<EntityListStoreState>(state, draft => {
             const { entities, uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id];
@@ -49,7 +54,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
     fetchError(id: number, error: any) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState>(state, draft => {
+        const newState = produce<EntityListStoreState>(state, draft => {
             const { uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id];
@@ -61,22 +66,37 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
         this.setState(newState);
     }
 
-    fetchAll() {
+    fetchPageWithFilters(payload: F) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState>(state, draft => {
+        const newState = produce<EntityListStoreState>(state, draft => {
             draft.loaded = false;
             draft.loading = true;
             draft.error = null;
+            draft.pagination.page.index = 0;
+            draft.pagination.filters = payload;
         });
 
         this.setState(newState);
     }
 
-    fetchAllSuccess(items: E[]) {
+    fetchPage(page?: Page) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState>(state, draft => {
+        const newState = produce<EntityListStoreState>(state, draft => {
+            draft.loaded = false;
+            draft.loading = true;
+            draft.error = null;
+            if (page) draft.pagination.page = page;
+        });
+
+        this.setState(newState);
+    }
+
+    fetchPageSuccess({ items, total }: PaginationPayload<E[]>) {
+        const state = this.getState();
+
+        const newState = produce<EntityListStoreState>(state, draft => {
             const ids: number[] = [];
 
             const { entities, uiEntities } = draft;
@@ -90,7 +110,6 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
 
                 const uiEntity: UI =
                     uiEntities[id] || this.createInitialUIState();
-
                 uiEntity.loaded = true;
 
                 uiEntities[id] = uiEntity;
@@ -99,15 +118,16 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
             draft.loaded = true;
             draft.loading = false;
             draft.ids = ids;
+            draft.pagination.total = total;
         });
 
         this.setState(newState);
     }
 
-    fetchAllError(error: any) {
+    fetchPageError(error: any) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState>(state, draft => {
+        const newState = produce<EntityListStoreState>(state, draft => {
             draft.loading = false;
             draft.error = error;
         });
@@ -118,8 +138,8 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
     insert(entity: E) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState>(state, draft => {
-            const { entities, uiEntities, ids } = draft;
+        const newState = produce<EntityListStoreState>(state, draft => {
+            const { entities, uiEntities, ids, pagination } = draft;
 
             const { id } = entity as any;
 
@@ -127,7 +147,9 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
 
             if (!uiEntities[id]) uiEntities[id] = this.createInitialUIState();
 
-            ids.push(id);
+            pagination.total++;
+
+            if (ids.length < pagination.page.size) ids.push(id);
         });
 
         this.setState(newState);
@@ -136,13 +158,15 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
     remove(idToRemove: number) {
         const state = this.getState();
 
-        const newState = produce<EntityStoreState<E, UI>>(state, draft => {
-            const { entities, uiEntities, ids } = draft;
+        const newState = produce<EntityListStoreState<E, UI>>(state, draft => {
+            const { entities, uiEntities, pagination, ids } = draft;
 
             delete entities[idToRemove];
             delete uiEntities[idToRemove];
 
             draft.ids = ids.filter(id => id != idToRemove);
+
+            if (pagination.total > 0) pagination.total--;
         });
 
         this.setState(newState);
@@ -160,7 +184,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
         };
     }
 
-    protected setState(state: EntityStoreState) {
+    protected setState(state: EntityListStoreState) {
         this._state$.next(state);
     }
 }

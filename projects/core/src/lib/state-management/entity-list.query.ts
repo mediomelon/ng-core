@@ -1,12 +1,16 @@
 import { combineLatest, Observable } from 'rxjs';
 import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 
-import { StateWithUI } from '../models';
-import { EntityStore } from './entity.store';
-import { EntityMapState, EntityStoreState, UIState } from './state';
+import { Page, Pagination, StateWithUI } from '../models';
+import { EntityListStore } from './entity-list.store';
+import { EntityListStoreState, EntityMapState, UIState } from './state';
 
-export abstract class EntityQuery<E = any, UI extends UIState = any> {
-    constructor(private __store__: EntityStore<E, UI>) {}
+export abstract class EntityListQuery<
+    E = any,
+    UI extends UIState = any,
+    F = any
+> {
+    constructor(private __store__: EntityListStore<E, UI, F>) {}
 
     selectLoaded(): Observable<boolean> {
         return this.__store__.state$.pipe(
@@ -29,9 +33,30 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
         );
     }
 
-    selectEntities(): Observable<E[]> {
-        return this.selectIds().pipe(
-            map(ids => ids.map(id => this.getEntity(id))),
+    selectTotal(): Observable<number> {
+        return this.selectPagination().pipe(
+            map(state => state.total),
+            distinctUntilChanged()
+        );
+    }
+
+    selectFilters(): Observable<F> {
+        return this.selectPagination().pipe(
+            map(state => state.filters),
+            distinctUntilChanged()
+        );
+    }
+
+    selectPageIndex(): Observable<number> {
+        return this.selectPagination().pipe(
+            map(state => state.page.index),
+            distinctUntilChanged()
+        );
+    }
+
+    selectPageSize(): Observable<number> {
+        return this.selectPagination().pipe(
+            map(state => state.page.size),
             distinctUntilChanged()
         );
     }
@@ -92,6 +117,26 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
         return this.getState().entities[id];
     }
 
+    getPage(): Page {
+        return this.getState().pagination.page;
+    }
+
+    getPageIndex(): number {
+        return this.getPage().index;
+    }
+
+    getPageSize(): number {
+        return this.getPage().size;
+    }
+
+    getFilters(): F {
+        return this.getState().pagination.filters;
+    }
+
+    getTotal(): number {
+        return this.getState().pagination.total;
+    }
+
     getError(): any {
         return this.getState().error;
     }
@@ -135,7 +180,14 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
         );
     }
 
-    protected getState(): EntityStoreState<E, UI> {
+    protected selectPagination(): Observable<Pagination<F>> {
+        return this.__store__.state$.pipe(
+            map(state => state.pagination),
+            distinctUntilChanged()
+        );
+    }
+
+    protected getState(): EntityListStoreState<E, UI, F> {
         return this.__store__.getState();
     }
 }
