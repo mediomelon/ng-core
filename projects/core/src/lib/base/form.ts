@@ -38,7 +38,8 @@ export abstract class FormBase<T = any> {
     shouldDisable(): boolean {
         return (
             this.isSubmitting ||
-            (this.form.invalid && (this.ngForm ? this.ngForm.submitted : true))
+            ((this.form.invalid || this.form.pending) &&
+                (this.ngForm ? this.ngForm.submitted : true))
         );
     }
 }
