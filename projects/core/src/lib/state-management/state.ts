@@ -32,3 +32,8 @@ export interface EntityListStoreState<
     ids: number[];
     pagination: Pagination<F>;
 }
+
+export interface EntitySubmitStoreState {
+    submitting: boolean;
+    error: any;
+}
