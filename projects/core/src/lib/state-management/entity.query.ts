@@ -3,7 +3,7 @@ import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { StateWithUI } from '../models';
 import { EntityStore } from './entity.store';
-import { EntityMapState, EntityStoreState, UIState } from './state';
+import { EntityMapState, EntityStoreState, ID, UIState } from './state';
 
 export abstract class EntityQuery<E = any, UI extends UIState = any> {
     constructor(private __store__: EntityStore<E, UI>) {}
@@ -53,42 +53,42 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
         );
     }
 
-    selectEntity(id: number): Observable<E> {
+    selectEntity(id: ID): Observable<E> {
         return this.selectEntitiesMap().pipe(
             map(entities => entities[id]),
             distinctUntilChanged()
         );
     }
 
-    selectUIEntity(id: number): Observable<UI> {
+    selectUIEntity(id: ID): Observable<UI> {
         return this.selectUIEntitiesMap().pipe(
             map(entities => entities[id]),
             distinctUntilChanged()
         );
     }
 
-    selectUIEntityLoaded(id: number): Observable<boolean> {
+    selectUIEntityLoaded(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
             map(entity => (entity ? entity.loaded : false)),
             distinctUntilChanged()
         );
     }
 
-    selectUIEntityLoading(id: number): Observable<boolean> {
+    selectUIEntityLoading(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
             map(entity => (entity ? entity.loading : false)),
             distinctUntilChanged()
         );
     }
 
-    selectUIEntityError(id: number): Observable<any> {
+    selectUIEntityError(id: ID): Observable<any> {
         return this.selectUIEntity(id).pipe(
             map(entity => (entity ? entity.error : null)),
             distinctUntilChanged()
         );
     }
 
-    getEntity(id: number): E {
+    getEntity(id: ID): E {
         return this.getState().entities[id];
     }
 
@@ -100,21 +100,21 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
         return this.getState().loaded;
     }
 
-    getUIEntity(id: number): UI {
+    getUIEntity(id: ID): UI {
         return this.getState().uiEntities[id];
     }
 
-    getUIEntityLoaded(id: number): boolean {
+    getUIEntityLoaded(id: ID): boolean {
         const entity = this.getUIEntity(id);
         return entity ? entity.loaded : false;
     }
 
-    getUIEntityError(id: number): boolean {
+    getUIEntityError(id: ID): boolean {
         const entity = this.getUIEntity(id);
         return entity ? entity.error : null;
     }
 
-    protected selectIds(): Observable<number[]> {
+    protected selectIds(): Observable<ID[]> {
         return this.__store__.state$.pipe(
             map(state => state.ids),
             distinctUntilChanged()

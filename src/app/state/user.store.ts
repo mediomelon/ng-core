@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EntityListState, EntityListStore, UIState } from 'projects/core/src/lib/state-management/entity.store';
+import { EntityListStore, EntityListStoreState, UIState } from 'projects/core/src/public-api';
 
 import { User } from '../models/user';
 
@@ -7,7 +7,7 @@ export interface UserUI extends UIState {
     isOpen: boolean;
 }
 
-const initialState: EntityListState<User> = {
+const initialState: EntityListStoreState<User> = {
     entities: {},
     uiEntities: {},
     ids: [],

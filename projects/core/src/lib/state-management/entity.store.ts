@@ -1,19 +1,27 @@
 import produce from 'immer';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { EntityStoreState, UIState } from './state';
+import { IdField } from './base';
+import { EntityStoreState, ID, UIState } from './state';
 
-export abstract class EntityStore<E = any, UI extends UIState = any> {
+export abstract class EntityStore<
+    E = any,
+    UI extends UIState = any
+> extends IdField {
     protected _state$: BehaviorSubject<EntityStoreState<E, UI>>;
 
     public state$: Observable<EntityStoreState<E, UI>>;
 
-    constructor(initialState: EntityStoreState) {
+    constructor(
+        initialState: EntityStoreState,
+        idField?: Extract<keyof E, string>
+    ) {
+        super(idField);
         this._state$ = new BehaviorSubject(initialState);
         this.state$ = this._state$.asObservable();
     }
 
-    fetch(id: number) {
+    fetch(id: ID) {
         const state = this.getState();
 
         const newState = produce<EntityStoreState>(state, draft => {
@@ -30,7 +38,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
         this.setState(newState);
     }
 
-    fetchSuccess(id: number, payload: E) {
+    fetchSuccess(id: ID, payload: E) {
         const state = this.getState();
 
         const newState = produce<EntityStoreState>(state, draft => {
@@ -46,7 +54,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
         this.setState(newState);
     }
 
-    fetchError(id: number, error: any) {
+    fetchError(id: ID, error: any) {
         const state = this.getState();
 
         const newState = produce<EntityStoreState>(state, draft => {
@@ -77,12 +85,12 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
         const state = this.getState();
 
         const newState = produce<EntityStoreState>(state, draft => {
-            const ids: number[] = [];
+            const ids: ID[] = [];
 
             const { entities, uiEntities } = draft;
 
             items.forEach(item => {
-                const { id } = item as any;
+                const { [this.idField]: id } = item as any;
 
                 ids.push(id);
 
@@ -121,7 +129,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
         const newState = produce<EntityStoreState>(state, draft => {
             const { entities, uiEntities, ids } = draft;
 
-            const { id } = entity as any;
+            const { [this.idField]: id } = entity as any;
 
             entities[id] = entity;
 
@@ -133,7 +141,7 @@ export abstract class EntityStore<E = any, UI extends UIState = any> {
         this.setState(newState);
     }
 
-    remove(idToRemove: number) {
+    remove(idToRemove: ID) {
         const state = this.getState();
 
         const newState = produce<EntityStoreState<E, UI>>(state, draft => {

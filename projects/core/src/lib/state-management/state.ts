@@ -7,7 +7,7 @@ export interface UIState {
 }
 
 export interface EntityMapState<T> {
-    [id: number]: T;
+    [id: string]: T;
 }
 
 export interface EntityStoreState<E = any, UI extends UIState = any> {
@@ -16,7 +16,7 @@ export interface EntityStoreState<E = any, UI extends UIState = any> {
     loaded: boolean;
     loading: boolean;
     error: any;
-    ids: number[];
+    ids: ID[];
 }
 
 export interface EntityListStoreState<
@@ -29,7 +29,7 @@ export interface EntityListStoreState<
     loaded: boolean;
     loading: boolean;
     error: any;
-    ids: number[];
+    ids: ID[];
     pagination: Pagination<F>;
 }
 
@@ -37,3 +37,5 @@ export interface EntitySubmitStoreState {
     submitting: boolean;
     error: any;
 }
+
+export type ID = number | string;

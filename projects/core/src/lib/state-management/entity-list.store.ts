@@ -2,23 +2,28 @@ import produce from 'immer';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Page, PaginationPayload } from '../models';
-import { EntityListStoreState, UIState } from './state';
+import { IdField } from './base';
+import { EntityListStoreState, ID, UIState } from './state';
 
 export abstract class EntityListStore<
     E = any,
     UI extends UIState = any,
     F = any
-> {
+> extends IdField {
     protected _state$: BehaviorSubject<EntityListStoreState<E, UI, F>>;
 
     public state$: Observable<EntityListStoreState<E, UI, F>>;
 
-    constructor(initialState: EntityListStoreState) {
+    constructor(
+        initialState: EntityListStoreState,
+        idField?: Extract<keyof E, string>
+    ) {
+        super(idField);
         this._state$ = new BehaviorSubject(initialState);
         this.state$ = this._state$.asObservable();
     }
 
-    fetch(id: number) {
+    fetch(id: ID) {
         const state = this.getState();
 
         const newState = produce<EntityListStoreState>(state, draft => {
@@ -35,7 +40,7 @@ export abstract class EntityListStore<
         this.setState(newState);
     }
 
-    fetchSuccess(id: number, payload: E) {
+    fetchSuccess(id: ID, payload: E) {
         const state = this.getState();
 
         const newState = produce<EntityListStoreState>(state, draft => {
@@ -51,7 +56,7 @@ export abstract class EntityListStore<
         this.setState(newState);
     }
 
-    fetchError(id: number, error: any) {
+    fetchError(id: ID, error: any) {
         const state = this.getState();
 
         const newState = produce<EntityListStoreState>(state, draft => {
@@ -97,12 +102,12 @@ export abstract class EntityListStore<
         const state = this.getState();
 
         const newState = produce<EntityListStoreState>(state, draft => {
-            const ids: number[] = [];
+            const ids: ID[] = [];
 
             const { entities, uiEntities } = draft;
 
             items.forEach(item => {
-                const { id } = item as any;
+                const { [this.idField]: id } = item as any;
 
                 ids.push(id);
 
@@ -141,7 +146,7 @@ export abstract class EntityListStore<
         const newState = produce<EntityListStoreState>(state, draft => {
             const { entities, uiEntities, ids, pagination } = draft;
 
-            const { id } = entity as any;
+            const { [this.idField]: id } = entity as any;
 
             entities[id] = entity;
 
@@ -155,7 +160,7 @@ export abstract class EntityListStore<
         this.setState(newState);
     }
 
-    remove(idToRemove: number) {
+    remove(idToRemove: ID) {
         const state = this.getState();
 
         const newState = produce<EntityListStoreState<E, UI>>(state, draft => {
