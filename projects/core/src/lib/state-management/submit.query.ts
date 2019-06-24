@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { EntitySubmitStore } from './entity-submit.store';
-import { EntitySubmitStoreState } from './state';
+import { SubmitStoreState } from './state';
+import { SubmitStore } from './submit.store';
 
-export abstract class EntitySubmitQuery<
-    S extends EntitySubmitStoreState = EntitySubmitStoreState
+export abstract class SubmitQuery<
+    S extends SubmitStoreState = SubmitStoreState
 > {
-    constructor(private __store__: EntitySubmitStore<S>) {}
+    constructor(private __store__: SubmitStore<S>) {}
 
     selectSubmitting(): Observable<boolean> {
         return this.__store__.state$.pipe(
@@ -23,7 +23,7 @@ export abstract class EntitySubmitQuery<
         );
     }
 
-    protected getState(): EntitySubmitStoreState {
+    protected getState(): SubmitStoreState {
         return this.__store__.getState();
     }
 }

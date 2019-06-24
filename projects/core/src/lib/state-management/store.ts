@@ -1,46 +1,46 @@
 import produce from 'immer';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { EntitySubmitStoreState } from './state';
+import { StoreState } from './state';
 
-export abstract class EntitySubmitStore<
-    S extends EntitySubmitStoreState = EntitySubmitStoreState
-> {
-    protected _state$: BehaviorSubject<S>;
+export abstract class Store<S = any, UI = any> {
+    protected _state$: BehaviorSubject<StoreState<S, UI>>;
 
-    public state$: Observable<S>;
+    public state$: Observable<StoreState<S, UI>>;
 
-    constructor(initialState: S) {
+    constructor(initialState: StoreState<S, UI>) {
         this._state$ = new BehaviorSubject(initialState);
         this.state$ = this._state$.asObservable();
     }
 
-    submit() {
+    fetch() {
         const state = this.getState();
 
         const newState = produce(state, draft => {
-            draft.submitting = true;
+            draft.loading = true;
             draft.error = null;
         });
 
         this.setState(newState);
     }
 
-    submitSuccess() {
+    fetchSuccess(payload: S) {
         const state = this.getState();
 
-        const newState = produce(state, draft => {
-            draft.submitting = false;
+        const newState = produce<StoreState>(state, draft => {
+            draft.loaded = true;
+            draft.loading = false;
+            draft.state = payload;
         });
 
         this.setState(newState);
     }
 
-    submitError(payload: any) {
+    fetchError(payload: any) {
         const state = this.getState();
 
         const newState = produce(state, draft => {
-            draft.submitting = false;
+            draft.loading = true;
             draft.error = payload;
         });
 
@@ -51,7 +51,7 @@ export abstract class EntitySubmitStore<
         return this._state$.getValue();
     }
 
-    protected setState(state: S) {
+    protected setState(state: StoreState<S, UI>) {
         this._state$.next(state);
     }
 }

@@ -33,9 +33,17 @@ export interface EntityListStoreState<
     pagination: Pagination<F>;
 }
 
-export interface EntitySubmitStoreState {
+export interface SubmitStoreState {
     submitting: boolean;
     error: any;
+}
+
+export interface StoreState<S = any, UI = any> {
+    loaded: boolean;
+    loading: boolean;
+    error: any;
+    state: S;
+    ui?: UI;
 }
 
 export type ID = number | string;
