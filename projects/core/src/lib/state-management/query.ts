@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { select } from 'rxjs-augment/operators';
+import { select } from 'rxjs-augmented/operators';
 
 import { StoreState } from './state';
 import { Store } from './store';

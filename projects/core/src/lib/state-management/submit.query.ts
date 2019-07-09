@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { select } from 'rxjs-augment/operators';
+import { select } from 'rxjs-augmented/operators';
 
 import { SubmitStoreState } from './state';
 import { SubmitStore } from './submit.store';

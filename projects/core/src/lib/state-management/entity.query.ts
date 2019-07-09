@@ -1,5 +1,5 @@
 import { combineLatest, Observable } from 'rxjs';
-import { select } from 'rxjs-augment/operators';
+import { select } from 'rxjs-augmented/operators';
 import { auditTime } from 'rxjs/operators';
 
 import { StateWithUI } from '../models';
