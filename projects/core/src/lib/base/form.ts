@@ -31,6 +31,14 @@ export abstract class FormBase<T = any> {
         return this.form.valid;
     }
 
+    isFormInvalid(): boolean {
+        return this.form.invalid;
+    }
+
+    isFormPending(): boolean {
+        return this.form.pending;
+    }
+
     getFormValue(): T {
         return this.form.value;
     }
@@ -38,7 +46,7 @@ export abstract class FormBase<T = any> {
     shouldDisable(): boolean {
         return (
             this.isSubmitting ||
-            ((this.form.invalid || this.form.pending) &&
+            ((this.isFormInvalid() || this.isFormPending()) &&
                 (this.ngForm ? this.ngForm.submitted : true))
         );
     }

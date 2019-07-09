@@ -1,8 +1,8 @@
 import { combineLatest, Observable } from 'rxjs';
+import { mapUntilChanged } from 'rxjs-augment/operators';
 import { auditTime } from 'rxjs/operators';
 
 import { StateWithUI } from '../models';
-import { select } from '../rxjs/select';
 import { EntityStore } from './entity.store';
 import { EntityMapState, EntityStoreState, ID, UIState } from './state';
 
@@ -10,20 +10,26 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
     constructor(private __store__: EntityStore<E, UI>) {}
 
     selectLoaded(): Observable<boolean> {
-        return this.__store__.state$.pipe(select(state => state.loaded));
+        return this.__store__.state$.pipe(
+            mapUntilChanged(state => state.loaded)
+        );
     }
 
     selectLoading(): Observable<boolean> {
-        return this.__store__.state$.pipe(select(state => state.loading));
+        return this.__store__.state$.pipe(
+            mapUntilChanged(state => state.loading)
+        );
     }
 
     selectError(): Observable<any> {
-        return this.__store__.state$.pipe(select(state => state.error));
+        return this.__store__.state$.pipe(
+            mapUntilChanged(state => state.error)
+        );
     }
 
     selectEntities(): Observable<E[]> {
         return this.selectIds().pipe(
-            select(ids => ids.map(id => this.getEntity(id)))
+            mapUntilChanged(ids => ids.map(id => this.getEntity(id)))
         );
     }
 
@@ -34,7 +40,7 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
             this.selectUIEntitiesMap()
         ).pipe(
             auditTime(0),
-            select(([ids, entities, uiEntities]) =>
+            mapUntilChanged(([ids, entities, uiEntities]) =>
                 ids.map(id => ({
                     state: entities[id],
                     ui: uiEntities[id],
@@ -44,30 +50,32 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
     }
 
     selectEntity(id: ID): Observable<E> {
-        return this.selectEntitiesMap().pipe(select(entities => entities[id]));
+        return this.selectEntitiesMap().pipe(
+            mapUntilChanged(entities => entities[id])
+        );
     }
 
     selectUIEntity(id: ID): Observable<UI> {
         return this.selectUIEntitiesMap().pipe(
-            select(entities => entities[id])
+            mapUntilChanged(entities => entities[id])
         );
     }
 
     selectUIEntityLoaded(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            select(entity => (entity ? entity.loaded : false))
+            mapUntilChanged(entity => (entity ? entity.loaded : false))
         );
     }
 
     selectUIEntityLoading(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            select(entity => (entity ? entity.loading : false))
+            mapUntilChanged(entity => (entity ? entity.loading : false))
         );
     }
 
     selectUIEntityError(id: ID): Observable<any> {
         return this.selectUIEntity(id).pipe(
-            select(entity => (entity ? entity.error : null))
+            mapUntilChanged(entity => (entity ? entity.error : null))
         );
     }
 
@@ -98,15 +106,19 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
     }
 
     protected selectIds(): Observable<ID[]> {
-        return this.__store__.state$.pipe(select(state => state.ids));
+        return this.__store__.state$.pipe(mapUntilChanged(state => state.ids));
     }
 
     protected selectEntitiesMap(): Observable<EntityMapState<E>> {
-        return this.__store__.state$.pipe(select(state => state.entities));
+        return this.__store__.state$.pipe(
+            mapUntilChanged(state => state.entities)
+        );
     }
 
     protected selectUIEntitiesMap(): Observable<EntityMapState<UI>> {
-        return this.__store__.state$.pipe(select(state => state.uiEntities));
+        return this.__store__.state$.pipe(
+            mapUntilChanged(state => state.uiEntities)
+        );
     }
 
     protected getState(): EntityStoreState<E, UI> {
