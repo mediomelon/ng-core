@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import produce from 'immer';
 import { EntityListStore, EntityListStoreState, UIState } from 'projects/core/src/public-api';
 
 import { User } from '../models/user';
@@ -29,6 +30,16 @@ const initialState: EntityListStoreState<User> = {
 export class UserStore extends EntityListStore<User, UserUI> {
     constructor() {
         super(initialState);
+    }
+
+    toggleOpen(id: number) {
+        const state = this.getState();
+
+        const newState = produce(state, draft => {
+            draft.uiEntities[id].isOpen = !draft.uiEntities[id].isOpen;
+        });
+
+        this.setState(newState);
     }
 
     createInitialUIState(): UserUI {

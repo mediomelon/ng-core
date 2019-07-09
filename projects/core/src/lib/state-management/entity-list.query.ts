@@ -1,7 +1,8 @@
 import { combineLatest, Observable } from 'rxjs';
-import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { auditTime } from 'rxjs/operators';
 
 import { Page, Pagination, StateWithUI } from '../models';
+import { select } from '../rxjs/select';
 import { EntityListStore } from './entity-list.store';
 import { EntityListStoreState, EntityMapState, ID, UIState } from './state';
 
@@ -13,52 +14,31 @@ export abstract class EntityListQuery<
     constructor(private __store__: EntityListStore<E, UI, F>) {}
 
     selectLoaded(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            map(state => state.loaded),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.loaded));
     }
 
     selectLoading(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            map(state => state.loading),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.loading));
     }
 
     selectError(): Observable<any> {
-        return this.__store__.state$.pipe(
-            map(state => state.error),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.error));
     }
 
     selectTotal(): Observable<number> {
-        return this.selectPagination().pipe(
-            map(state => state.total),
-            distinctUntilChanged()
-        );
+        return this.selectPagination().pipe(select(state => state.total));
     }
 
     selectFilters(): Observable<F> {
-        return this.selectPagination().pipe(
-            map(state => state.filters),
-            distinctUntilChanged()
-        );
+        return this.selectPagination().pipe(select(state => state.filters));
     }
 
     selectPageIndex(): Observable<number> {
-        return this.selectPagination().pipe(
-            map(state => state.page.index),
-            distinctUntilChanged()
-        );
+        return this.selectPagination().pipe(select(state => state.page.index));
     }
 
     selectPageSize(): Observable<number> {
-        return this.selectPagination().pipe(
-            map(state => state.page.size),
-            distinctUntilChanged()
-        );
+        return this.selectPagination().pipe(select(state => state.page.size));
     }
 
     selectEntitiesWithUI(): Observable<StateWithUI<E, UI>[]> {
@@ -68,48 +48,40 @@ export abstract class EntityListQuery<
             this.selectUIEntitiesMap()
         ).pipe(
             auditTime(0),
-            map(([ids, entities, uiEntities]) =>
+            select(([ids, entities, uiEntities]) =>
                 ids.map(id => ({
                     state: entities[id],
                     ui: uiEntities[id],
                 }))
-            ),
-            distinctUntilChanged()
+            )
         );
     }
 
     selectEntity(id: ID): Observable<E> {
-        return this.selectEntitiesMap().pipe(
-            map(entities => entities[id]),
-            distinctUntilChanged()
-        );
+        return this.selectEntitiesMap().pipe(select(entities => entities[id]));
     }
 
     selectUIEntity(id: ID): Observable<UI> {
         return this.selectUIEntitiesMap().pipe(
-            map(entities => entities[id]),
-            distinctUntilChanged()
+            select(entities => entities[id])
         );
     }
 
     selectUIEntityLoaded(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            map(entity => (entity ? entity.loaded : false)),
-            distinctUntilChanged()
+            select(entity => (entity ? entity.loaded : false))
         );
     }
 
     selectUIEntityLoading(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            map(entity => (entity ? entity.loading : false)),
-            distinctUntilChanged()
+            select(entity => (entity ? entity.loading : false))
         );
     }
 
     selectUIEntityError(id: ID): Observable<any> {
         return this.selectUIEntity(id).pipe(
-            map(entity => (entity ? entity.error : null)),
-            distinctUntilChanged()
+            select(entity => (entity ? entity.error : null))
         );
     }
 
@@ -160,31 +132,19 @@ export abstract class EntityListQuery<
     }
 
     protected selectIds(): Observable<ID[]> {
-        return this.__store__.state$.pipe(
-            map(state => state.ids),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.ids));
     }
 
     protected selectEntitiesMap(): Observable<EntityMapState<E>> {
-        return this.__store__.state$.pipe(
-            map(state => state.entities),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.entities));
     }
 
     protected selectUIEntitiesMap(): Observable<EntityMapState<UI>> {
-        return this.__store__.state$.pipe(
-            map(state => state.uiEntities),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.uiEntities));
     }
 
     protected selectPagination(): Observable<Pagination<F>> {
-        return this.__store__.state$.pipe(
-            map(state => state.pagination),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.pagination));
     }
 
     protected getState(): EntityListStoreState<E, UI, F> {

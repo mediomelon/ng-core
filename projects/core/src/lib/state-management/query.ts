@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
+import { select } from '../rxjs/select';
 import { StoreState } from './state';
 import { Store } from './store';
 
@@ -8,31 +8,19 @@ export abstract class Query<S = any, UI = any> {
     constructor(private __store__: Store<S, UI>) {}
 
     selectLoaded(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            map(state => state.loaded),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.loaded));
     }
 
     selectLoading(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            map(state => state.loading),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.loading));
     }
 
     selectError(): Observable<any> {
-        return this.__store__.state$.pipe(
-            map(state => state.error),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.error));
     }
 
     selectState(): Observable<S> {
-        return this.__store__.state$.pipe(
-            map(state => state.state),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.state));
     }
 
     getLoaded(): boolean {
@@ -44,10 +32,7 @@ export abstract class Query<S = any, UI = any> {
     }
 
     protected selectUIState(): Observable<UI> {
-        return this.__store__.state$.pipe(
-            map(state => state.ui),
-            distinctUntilChanged()
-        );
+        return this.__store__.state$.pipe(select(state => state.ui));
     }
 
     protected getState(): StoreState<S, UI> {

@@ -15,7 +15,9 @@ export class StateManagementPage implements OnInit {
 
     entities$ = this.query.selectEntitiesWithUI();
 
-    isLoadingEntity$ = this.query.selectUIEntityLoading(1);
+    isLoadingEntity$ = this.query
+        .selectUIEntityLoading(1)
+        .pipe(tap(console.log));
 
     entity$ = this.query.selectEntity(1);
 
@@ -26,5 +28,9 @@ export class StateManagementPage implements OnInit {
 
     ngOnInit() {
         this.storeService.get(1).subscribe();
+    }
+
+    toggle() {
+        this.storeService.toggle(1);
     }
 }

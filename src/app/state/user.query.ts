@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EntityListQuery } from 'projects/core/src/lib/state-management/entity.query';
+import { EntityListQuery } from 'projects/core/src/lib/state-management/entity-list.query';
 import { combineLatest } from 'rxjs';
 import { auditTime, map } from 'rxjs/operators';
 

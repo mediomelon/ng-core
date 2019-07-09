@@ -10,6 +10,10 @@ import { UserStore } from './user.store';
 export class UserStoreService {
     constructor(private userService: UserService, private store: UserStore) {}
 
+    toggle(id: number) {
+        this.store.toggleOpen(id);
+    }
+
     getAll() {
         this.store.fetchPage();
         return this.userService.getAll().pipe(
