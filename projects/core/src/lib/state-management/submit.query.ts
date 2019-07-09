@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { mapUntilChanged } from 'rxjs-augment/operators';
+import { select } from 'rxjs-augment/operators';
 
 import { SubmitStoreState } from './state';
 import { SubmitStore } from './submit.store';
@@ -10,15 +10,11 @@ export abstract class SubmitQuery<
     constructor(private __store__: SubmitStore<S>) {}
 
     selectSubmitting(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.submitting)
-        );
+        return this.__store__.state$.pipe(select(state => state.submitting));
     }
 
     selectError(): Observable<any> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.error)
-        );
+        return this.__store__.state$.pipe(select(state => state.error));
     }
 
     protected getState(): SubmitStoreState {

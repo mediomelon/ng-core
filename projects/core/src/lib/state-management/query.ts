@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { mapUntilChanged } from 'rxjs-augment/operators';
+import { select } from 'rxjs-augment/operators';
 
 import { StoreState } from './state';
 import { Store } from './store';
@@ -8,27 +8,19 @@ export abstract class Query<S = any, UI = any> {
     constructor(private __store__: Store<S, UI>) {}
 
     selectLoaded(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.loaded)
-        );
+        return this.__store__.state$.pipe(select(state => state.loaded));
     }
 
     selectLoading(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.loading)
-        );
+        return this.__store__.state$.pipe(select(state => state.loading));
     }
 
     selectError(): Observable<any> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.error)
-        );
+        return this.__store__.state$.pipe(select(state => state.error));
     }
 
     selectState(): Observable<S> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.state)
-        );
+        return this.__store__.state$.pipe(select(state => state.state));
     }
 
     getLoaded(): boolean {
@@ -40,7 +32,7 @@ export abstract class Query<S = any, UI = any> {
     }
 
     protected selectUIState(): Observable<UI> {
-        return this.__store__.state$.pipe(mapUntilChanged(state => state.ui));
+        return this.__store__.state$.pipe(select(state => state.ui));
     }
 
     protected getState(): StoreState<S, UI> {

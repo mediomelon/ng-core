@@ -1,5 +1,5 @@
 import { combineLatest, Observable } from 'rxjs';
-import { mapUntilChanged } from 'rxjs-augment/operators';
+import { select } from 'rxjs-augment/operators';
 import { auditTime } from 'rxjs/operators';
 
 import { StateWithUI } from '../models';
@@ -10,26 +10,20 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
     constructor(private __store__: EntityStore<E, UI>) {}
 
     selectLoaded(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.loaded)
-        );
+        return this.__store__.state$.pipe(select(state => state.loaded));
     }
 
     selectLoading(): Observable<boolean> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.loading)
-        );
+        return this.__store__.state$.pipe(select(state => state.loading));
     }
 
     selectError(): Observable<any> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.error)
-        );
+        return this.__store__.state$.pipe(select(state => state.error));
     }
 
     selectEntities(): Observable<E[]> {
         return this.selectIds().pipe(
-            mapUntilChanged(ids => ids.map(id => this.getEntity(id)))
+            select(ids => ids.map(id => this.getEntity(id)))
         );
     }
 
@@ -40,7 +34,7 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
             this.selectUIEntitiesMap()
         ).pipe(
             auditTime(0),
-            mapUntilChanged(([ids, entities, uiEntities]) =>
+            select(([ids, entities, uiEntities]) =>
                 ids.map(id => ({
                     state: entities[id],
                     ui: uiEntities[id],
@@ -50,32 +44,30 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
     }
 
     selectEntity(id: ID): Observable<E> {
-        return this.selectEntitiesMap().pipe(
-            mapUntilChanged(entities => entities[id])
-        );
+        return this.selectEntitiesMap().pipe(select(entities => entities[id]));
     }
 
     selectUIEntity(id: ID): Observable<UI> {
         return this.selectUIEntitiesMap().pipe(
-            mapUntilChanged(entities => entities[id])
+            select(entities => entities[id])
         );
     }
 
     selectUIEntityLoaded(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            mapUntilChanged(entity => (entity ? entity.loaded : false))
+            select(entity => (entity ? entity.loaded : false))
         );
     }
 
     selectUIEntityLoading(id: ID): Observable<boolean> {
         return this.selectUIEntity(id).pipe(
-            mapUntilChanged(entity => (entity ? entity.loading : false))
+            select(entity => (entity ? entity.loading : false))
         );
     }
 
     selectUIEntityError(id: ID): Observable<any> {
         return this.selectUIEntity(id).pipe(
-            mapUntilChanged(entity => (entity ? entity.error : null))
+            select(entity => (entity ? entity.error : null))
         );
     }
 
@@ -106,19 +98,15 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
     }
 
     protected selectIds(): Observable<ID[]> {
-        return this.__store__.state$.pipe(mapUntilChanged(state => state.ids));
+        return this.__store__.state$.pipe(select(state => state.ids));
     }
 
     protected selectEntitiesMap(): Observable<EntityMapState<E>> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.entities)
-        );
+        return this.__store__.state$.pipe(select(state => state.entities));
     }
 
     protected selectUIEntitiesMap(): Observable<EntityMapState<UI>> {
-        return this.__store__.state$.pipe(
-            mapUntilChanged(state => state.uiEntities)
-        );
+        return this.__store__.state$.pipe(select(state => state.uiEntities));
     }
 
     protected getState(): EntityStoreState<E, UI> {
