@@ -1,6 +1,6 @@
 import { combineLatest, Observable } from 'rxjs';
 import { select } from 'rxjs-augmented/operators';
-import { auditTime } from 'rxjs/operators';
+import { auditTime, filter } from 'rxjs/operators';
 
 import { StateWithUI } from '../models';
 import { EntityStore } from './entity.store';
@@ -22,8 +22,9 @@ export abstract class EntityQuery<E = any, UI extends UIState = any> {
     }
 
     selectEntities(): Observable<E[]> {
-        return this.selectIds().pipe(
-            select(ids => ids.map(id => this.getEntity(id)))
+        return combineLatest(this.selectIds(), this.selectEntitiesMap()).pipe(
+            select(([ids, entitiesMap]) => ids.map(id => entitiesMap[id])),
+            filter(entities => !entities.includes(undefined))
         );
     }
 

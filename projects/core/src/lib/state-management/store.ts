@@ -40,7 +40,7 @@ export abstract class Store<S = any, UI = any> {
         const state = this.getState();
 
         const newState = produce(state, draft => {
-            draft.loading = true;
+            draft.loading = false;
             draft.error = payload;
         });
 
