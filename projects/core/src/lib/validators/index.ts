@@ -1,7 +1,6 @@
 import { ValidatorFn, Validators } from '@angular/forms';
 
 import { COGNITO_PASSWORD_REGEX } from '../regex';
-import { ALPHA_WITH_SPACE_REGEX } from '../regex/apha-with-space';
 
 export * from './alpha-with-space';
 

@@ -1,4 +1,4 @@
-import { ALPHA_WITH_SPACE_REGEX } from './apha-with-space';
+import { ALPHA_WITH_SPACE_REGEX } from './alpha-with-space';
 
 describe('Alpha With Space Regex', () => {
     it('should reject empty string', () => {
@@ -17,7 +17,7 @@ describe('Alpha With Space Regex', () => {
     });
 
     it('should acce0t string with alphabet characters or spaces', () => {
-        expect(ALPHA_WITH_SPACE_REGEX.test('test')).toBe(true);
+        expect(ALPHA_WITH_SPACE_REGEX.test('ecarin')).toBe(true);
         expect(ALPHA_WITH_SPACE_REGEX.test('test test')).toBe(true);
     });
 
