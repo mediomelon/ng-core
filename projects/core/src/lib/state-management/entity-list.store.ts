@@ -140,21 +140,28 @@ export abstract class EntityListStore<
         this.setState(newState);
     }
 
-    insert(entity: E) {
+    insert(entityOrEntities: E | E[]) {
         const state = this.getState();
 
         const newState = produce<EntityListStoreState>(state, draft => {
             const { entities, uiEntities, ids, pagination } = draft;
 
-            const { [this.idField]: id } = entity as any;
+            const payload: E[] = Array.isArray(entityOrEntities)
+                ? entityOrEntities
+                : [entityOrEntities];
 
-            entities[id] = entity;
+            payload.forEach(entity => {
+                const { [this.idField]: id } = entity as any;
 
-            if (!uiEntities[id]) uiEntities[id] = this.createInitialUIState();
+                entities[id] = entity;
 
-            pagination.total++;
+                if (!uiEntities[id])
+                    uiEntities[id] = this.createInitialUIState();
 
-            if (ids.length < pagination.page.size) ids.push(id);
+                pagination.total++;
+
+                if (ids.length < pagination.page.size) ids.push(id);
+            });
         });
 
         this.setState(newState);

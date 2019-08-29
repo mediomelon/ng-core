@@ -9,7 +9,8 @@ export abstract class FormBase<T = any> {
     @ViewChild(FormGroupDirective, { static: true })
     ngForm: FormGroupDirective;
 
-    @ViewChild('submitButton', { static: true }) button: ElementRef;
+    @ViewChild('submitButton', { static: true, read: ElementRef })
+    button: ElementRef;
 
     form: FormGroup;
 

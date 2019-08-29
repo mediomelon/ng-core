@@ -123,19 +123,26 @@ export abstract class EntityStore<
         this.setState(newState);
     }
 
-    insert(entity: E) {
+    insert(entityOrEntities: E | E[]) {
         const state = this.getState();
 
         const newState = produce<EntityStoreState>(state, draft => {
             const { entities, uiEntities, ids } = draft;
 
-            const { [this.idField]: id } = entity as any;
+            const payload: E[] = Array.isArray(entityOrEntities)
+                ? entityOrEntities
+                : [entityOrEntities];
 
-            entities[id] = entity;
+            payload.forEach(entity => {
+                const { [this.idField]: id } = entity as any;
 
-            if (!uiEntities[id]) uiEntities[id] = this.createInitialUIState();
+                entities[id] = entity;
 
-            ids.push(id);
+                if (!uiEntities[id])
+                    uiEntities[id] = this.createInitialUIState();
+
+                ids.push(id);
+            });
         });
 
         this.setState(newState);

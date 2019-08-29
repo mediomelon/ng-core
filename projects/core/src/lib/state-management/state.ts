@@ -47,3 +47,13 @@ export interface StoreState<S = any, UI = any> {
 }
 
 export type ID = number | string;
+
+export interface UnionEntity {
+    id: ID;
+    ids: ID[];
+}
+
+export interface UnionStoreState {
+    entities: EntityMapState<UnionEntity>;
+    uiEntities: EntityMapState<UIState>;
+}

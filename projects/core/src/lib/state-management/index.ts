@@ -6,4 +6,6 @@ export * from './entity-list.query';
 export * from './entity-list.store';
 export * from './submit.store';
 export * from './submit.query';
+export * from './union.store';
+export * from './union.query';
 export * from './state';
