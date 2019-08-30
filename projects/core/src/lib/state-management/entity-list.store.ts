@@ -31,6 +31,7 @@ export abstract class EntityListStore<
 
             const uiEntity: UI = uiEntities[id] || this.createInitialUIState();
 
+            uiEntity.loaded = false;
             uiEntity.loading = true;
             uiEntity.error = null;
 

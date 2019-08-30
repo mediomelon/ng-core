@@ -29,6 +29,16 @@ export abstract class EntityListQuery<
         return this.selectPagination().pipe(select(state => state.total));
     }
 
+    selectLength(): Observable<number> {
+        return this.selectIds().pipe(select(state => state.length));
+    }
+
+    selectEmpty(): Observable<boolean> {
+        return combineLatest(this.selectLoaded(), this.selectLength()).pipe(
+            select(([hasLoaded, length]) => hasLoaded && length === 0)
+        );
+    }
+
     selectFilters(): Observable<F> {
         return this.selectPagination().pipe(select(state => state.filters));
     }
@@ -129,6 +139,13 @@ export abstract class EntityListQuery<
     getUIEntityError(id: ID): boolean {
         const entity = this.getUIEntity(id);
         return entity ? entity.error : null;
+    }
+
+    shouldFetch(id: number): boolean {
+        const loaded = this.getUIEntityLoaded(id);
+        const error = this.getUIEntityError(id);
+
+        return !loaded || !!error;
     }
 
     protected selectIds(): Observable<ID[]> {
