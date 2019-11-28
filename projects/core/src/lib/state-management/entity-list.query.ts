@@ -141,11 +141,12 @@ export abstract class EntityListQuery<
         return entity ? entity.error : null;
     }
 
-    shouldFetch(id: number): boolean {
-        const loaded = this.getUIEntityLoaded(id);
-        const error = this.getUIEntityError(id);
+    shouldFetchEntity(id: number): boolean {
+        return !this.getUIEntityLoaded(id) || !!this.getUIEntityError(id);
+    }
 
-        return !loaded || !!error;
+    shouldFetch(): boolean {
+        return !this.getLoaded() || !!this.getError();
     }
 
     protected selectIds(): Observable<ID[]> {
