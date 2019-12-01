@@ -14,44 +14,34 @@ export abstract class Store<S = any, UI = any> {
     }
 
     fetch() {
-        const state = this.getState();
-
-        const newState = produce(state, draft => {
+        this.setState(draft => {
             draft.loading = true;
             draft.error = null;
         });
-
-        this.setState(newState);
     }
 
     fetchSuccess(payload: S) {
-        const state = this.getState();
-
-        const newState = produce<StoreState>(state, draft => {
+        this.setState(draft => {
             draft.loaded = true;
             draft.loading = false;
             draft.state = payload;
         });
-
-        this.setState(newState);
     }
 
     fetchError(payload: any) {
-        const state = this.getState();
-
-        const newState = produce(state, draft => {
+        this.setState(draft => {
             draft.loading = false;
             draft.error = payload;
         });
-
-        this.setState(newState);
     }
 
     getState() {
         return this._state$.getValue();
     }
 
-    protected setState(state: StoreState<S, UI>) {
-        this._state$.next(state);
+    protected setState(producer: (draft: StoreState<S, UI>) => void) {
+        const prevState = this.getState();
+        const nextValue = produce(prevState, producer);
+        this._state$.next(nextValue);
     }
 }

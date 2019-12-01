@@ -24,9 +24,7 @@ export abstract class EntityListStore<
     }
 
     fetch(id: ID) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState((draft: EntityListStoreState) => {
             const { uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id] || this.createInitialUIState();
@@ -37,14 +35,10 @@ export abstract class EntityListStore<
 
             uiEntities[id] = uiEntity;
         });
-
-        this.setState(newState);
     }
 
     fetchSuccess(id: ID, payload: E) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState(draft => {
             const { entities, uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id];
@@ -53,14 +47,10 @@ export abstract class EntityListStore<
             uiEntity.loaded = true;
             uiEntity.loading = false;
         });
-
-        this.setState(newState);
     }
 
     fetchError(id: ID, error: any) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState(draft => {
             const { uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id];
@@ -68,41 +58,29 @@ export abstract class EntityListStore<
             uiEntity.loading = false;
             uiEntity.error = error;
         });
-
-        this.setState(newState);
     }
 
     fetchPageWithFilters(payload: F) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState(draft => {
             draft.loaded = false;
             draft.loading = true;
             draft.error = null;
             draft.pagination.page.index = 0;
             draft.pagination.filters = payload;
         });
-
-        this.setState(newState);
     }
 
     fetchPage(page?: Page) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState(draft => {
             draft.loaded = false;
             draft.loading = true;
             draft.error = null;
             if (page) draft.pagination.page = page;
         });
-
-        this.setState(newState);
     }
 
     fetchPageSuccess({ items, total }: PaginationPayload<E[]>) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState((draft: EntityListStoreState) => {
             const ids: ID[] = [];
 
             const { entities, uiEntities } = draft;
@@ -126,25 +104,17 @@ export abstract class EntityListStore<
             draft.ids = ids;
             draft.pagination.total = total;
         });
-
-        this.setState(newState);
     }
 
     fetchPageError(error: any) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState(draft => {
             draft.loading = false;
             draft.error = error;
         });
-
-        this.setState(newState);
     }
 
     insert(entityOrEntities: E | E[]) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState>(state, draft => {
+        this.setState((draft: EntityListStoreState) => {
             const { entities, uiEntities, ids, pagination } = draft;
 
             const payload: E[] = Array.isArray(entityOrEntities)
@@ -164,14 +134,10 @@ export abstract class EntityListStore<
                 if (ids.length < pagination.page.size) ids.push(id);
             });
         });
-
-        this.setState(newState);
     }
 
     remove(idToRemove: ID) {
-        const state = this.getState();
-
-        const newState = produce<EntityListStoreState<E, UI>>(state, draft => {
+        this.setState(draft => {
             const { entities, uiEntities, pagination, ids } = draft;
 
             delete entities[idToRemove];
@@ -181,8 +147,6 @@ export abstract class EntityListStore<
 
             if (pagination.total > 0) pagination.total--;
         });
-
-        this.setState(newState);
     }
 
     getState() {
@@ -197,7 +161,11 @@ export abstract class EntityListStore<
         };
     }
 
-    protected setState(state: EntityListStoreState) {
-        this._state$.next(state);
+    protected setState(
+        producer: (draft: EntityListStoreState<E, UI, F>) => void
+    ) {
+        const prevState = this.getState();
+        const nextValue = produce(prevState, producer);
+        this._state$.next(nextValue);
     }
 }

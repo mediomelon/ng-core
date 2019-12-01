@@ -21,9 +21,7 @@ export abstract class UnionStore {
     }
 
     fetchAll(id: ID) {
-        const state = this.getState();
-
-        const newState = produce<UnionStoreState>(state, draft => {
+        this.setState(draft => {
             const { uiEntities } = draft;
 
             const uiEntity: UIState =
@@ -35,14 +33,10 @@ export abstract class UnionStore {
 
             uiEntities[id] = uiEntity;
         });
-
-        this.setState(newState);
     }
 
     fetchAllSuccess(id: ID, ids: ID[]) {
-        const state = this.getState();
-
-        const newState = produce<UnionStoreState>(state, draft => {
+        this.setState(draft => {
             const { entities, uiEntities } = draft;
             const uiEntity = uiEntities[id];
 
@@ -56,14 +50,10 @@ export abstract class UnionStore {
 
             uiEntities[id] = uiEntity;
         });
-
-        this.setState(newState);
     }
 
     fetchAllError(id: ID, error: any) {
-        const state = this.getState();
-
-        const newState = produce<UnionStoreState>(state, draft => {
+        this.setState(draft => {
             const { uiEntities } = draft;
 
             const uiEntity = uiEntities[id];
@@ -71,14 +61,10 @@ export abstract class UnionStore {
             uiEntity.loading = false;
             uiEntity.error = error;
         });
-
-        this.setState(newState);
     }
 
     insert(id: ID, idOrIds: ID | ID[]) {
-        const state = this.getState();
-
-        const newState = produce<UnionStoreState>(state, draft => {
+        this.setState(draft => {
             const { entities, uiEntities } = draft;
 
             const entity: UnionEntity = (entities[id] as UnionEntity) || {
@@ -94,34 +80,24 @@ export abstract class UnionStore {
 
             if (!uiEntities[id]) uiEntities[id] = this.createInitialUIState();
         });
-
-        this.setState(newState);
     }
 
     remove(unionId: ID, idToRemove: ID) {
-        const state = this.getState();
-
-        const newState = produce<UnionStoreState>(state, draft => {
+        this.setState(draft => {
             const { entities } = draft;
             const entity = entities[unionId];
 
             entity.ids = entity.ids.filter(id => id != idToRemove);
         });
-
-        this.setState(newState);
     }
 
     removeUnion(id: ID) {
-        const state = this.getState();
-
-        const newState = produce<UnionStoreState>(state, draft => {
+        this.setState(draft => {
             const { entities, uiEntities } = draft;
 
             delete entities[id];
             delete uiEntities[id];
         });
-
-        this.setState(newState);
     }
 
     getState() {
@@ -136,7 +112,9 @@ export abstract class UnionStore {
         };
     }
 
-    protected setState(state: UnionStoreState) {
-        this._state$.next(state);
+    protected setState(producer: (draft: UnionStoreState) => void) {
+        const prevState = this.getState();
+        const nextValue = produce(prevState, producer);
+        this._state$.next(nextValue);
     }
 }
