@@ -1,6 +1,5 @@
 import produce from 'immer';
 import { BehaviorSubject, Observable } from 'rxjs';
-
 import { IdField } from './base';
 import { EntityStoreState, ID, UIState } from './state';
 
@@ -22,9 +21,7 @@ export abstract class EntityStore<
     }
 
     fetch(id: ID) {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState>(state, draft => {
+        this.setState((draft: EntityStoreState) => {
             const { uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id] || this.createInitialUIState();
@@ -34,14 +31,10 @@ export abstract class EntityStore<
 
             uiEntities[id] = uiEntity;
         });
-
-        this.setState(newState);
     }
 
     fetchSuccess(id: ID, payload: E) {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState>(state, draft => {
+        this.setState(draft => {
             const { entities, uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id];
@@ -50,14 +43,10 @@ export abstract class EntityStore<
             uiEntity.loaded = true;
             uiEntity.loading = false;
         });
-
-        this.setState(newState);
     }
 
     fetchError(id: ID, error: any) {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState>(state, draft => {
+        this.setState(draft => {
             const { uiEntities } = draft;
 
             const uiEntity: UI = uiEntities[id];
@@ -65,26 +54,18 @@ export abstract class EntityStore<
             uiEntity.loading = false;
             uiEntity.error = error;
         });
-
-        this.setState(newState);
     }
 
     fetchAll() {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState>(state, draft => {
+        this.setState(draft => {
             draft.loaded = false;
             draft.loading = true;
             draft.error = null;
         });
-
-        this.setState(newState);
     }
 
     fetchAllSuccess(items: E[]) {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState>(state, draft => {
+        this.setState((draft: EntityStoreState) => {
             const ids: ID[] = [];
 
             const { entities, uiEntities } = draft;
@@ -108,25 +89,17 @@ export abstract class EntityStore<
             draft.loading = false;
             draft.ids = ids;
         });
-
-        this.setState(newState);
     }
 
     fetchAllError(error: any) {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState>(state, draft => {
+        this.setState(draft => {
             draft.loading = false;
             draft.error = error;
         });
-
-        this.setState(newState);
     }
 
     insert(entityOrEntities: E | E[]) {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState>(state, draft => {
+        this.setState((draft: EntityStoreState) => {
             const { entities, uiEntities, ids } = draft;
 
             const payload: E[] = Array.isArray(entityOrEntities)
@@ -144,14 +117,10 @@ export abstract class EntityStore<
                 ids.push(id);
             });
         });
-
-        this.setState(newState);
     }
 
     remove(idToRemove: ID) {
-        const state = this.getState();
-
-        const newState = produce<EntityStoreState<E, UI>>(state, draft => {
+        this.setState(draft => {
             const { entities, uiEntities, ids } = draft;
 
             delete entities[idToRemove];
@@ -159,8 +128,6 @@ export abstract class EntityStore<
 
             draft.ids = ids.filter(id => id != idToRemove);
         });
-
-        this.setState(newState);
     }
 
     getState() {
@@ -175,7 +142,9 @@ export abstract class EntityStore<
         };
     }
 
-    protected setState(state: EntityStoreState) {
-        this._state$.next(state);
+    protected setState(producer: (draft: EntityStoreState<E, UI>) => void) {
+        const prevState = this.getState();
+        const nextValue = produce(prevState, producer);
+        this._state$.next(nextValue);
     }
 }

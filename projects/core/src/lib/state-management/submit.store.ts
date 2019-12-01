@@ -16,42 +16,32 @@ export abstract class SubmitStore<
     }
 
     submit() {
-        const state = this.getState();
-
-        const newState = produce(state, draft => {
+        this.setState(draft => {
             draft.submitting = true;
             draft.error = null;
         });
-
-        this.setState(newState);
     }
 
     submitSuccess() {
-        const state = this.getState();
-
-        const newState = produce(state, draft => {
+        this.setState(draft => {
             draft.submitting = false;
         });
-
-        this.setState(newState);
     }
 
     submitError(payload: any) {
-        const state = this.getState();
-
-        const newState = produce(state, draft => {
+        this.setState(draft => {
             draft.submitting = false;
             draft.error = payload;
         });
-
-        this.setState(newState);
     }
 
     getState() {
         return this._state$.getValue();
     }
 
-    protected setState(state: S) {
-        this._state$.next(state);
+    protected setState(producer: (draft: S) => void) {
+        const prevState = this.getState();
+        const nextValue = produce(prevState, producer);
+        this._state$.next(nextValue);
     }
 }
