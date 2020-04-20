@@ -6,9 +6,9 @@
         "url": "https://github.com/mediomelon/ng-core"
     },
     "peerDependencies": {
-        "@angular/common": "^8.0.0",
-        "@angular/core": "^8.0.0",
-        "immer": "^3.1.2",
-        "rxjs-augmented": "^1.0.0"
+        "@angular/common": "~8.2.7",
+        "@angular/core": "~8.2.7",
+        "immer": "^5.0.0",
+        "rxjs-augmented": "^1.0.1",
     }
 }
